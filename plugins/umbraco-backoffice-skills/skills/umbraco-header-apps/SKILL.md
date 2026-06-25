@@ -1,6 +1,6 @@
 ---
 name: umbraco-header-apps
-description: Implement header apps in Umbraco backoffice using official docs
+description: Use when the user wants to add anything to Umbraco's top header bar — the strip with the user avatar, search icon, and global icons. Covers: notification bells with badge counters, dropdown panels, icon buttons, external links, and any globally visible element at the top of the backoffice. Also use for debugging why a headerApp extension appears in the registry but doesn't show up in the UI. The relevant extension type is `headerApp`. Not for section nav, tree context menus, dashboards, or property editors.
 version: 1.0.0
 location: managed
 allowed-tools: Read, Write, Edit, WebFetch
