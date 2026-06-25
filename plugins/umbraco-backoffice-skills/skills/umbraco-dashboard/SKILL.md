@@ -49,39 +49,48 @@ If you need to explain these foundational concepts when implementing dashboards,
 ## Workflow
 
 1. **Fetch docs** - Use WebFetch on the URLs above
-2. **Ask questions** - What section? What functionality? Who can access?
+2. **Ask questions** - What section? What functionality? Who can access? Should it appear in a specific position in the tab list?
 3. **Generate files** - Create manifest + implementation based on latest docs
 4. **Explain** - Show what was created and how to test
 
+## Tab ordering
+
+Use `weight` in the manifest to control where the dashboard appears in its section's tab list. **Higher weight = appears earlier (further left).** Umbraco's built-in dashboards use weights in the 100–500 range (e.g. "Getting Started" is around weight 20 in some versions — always check the docs). To appear first, use a higher value than the built-ins; to appear second, use a value between the first and third.
+
 ## Minimal Examples
 
-### Manifest (umbraco-package.json)
-```json
-{
-  "type": "dashboard",
-  "alias": "my.dashboard",
-  "name": "My Dashboard",
-  "element": "/App_Plugins/MyDashboard/dashboard.js",
-  "meta": {
-    "label": "My Dashboard",
-    "pathname": "my-dashboard"
+### Manifest (manifest.ts)
+```typescript
+import type { ManifestDashboard } from '@umbraco-cms/backoffice/dashboard';
+
+export const manifest: ManifestDashboard = {
+  type: 'dashboard',
+  alias: 'my.dashboard',
+  name: 'My Dashboard',
+  weight: 100, // higher = appears earlier in the tab list
+  js: () => import('./my-dashboard.element.js'),
+  meta: {
+    label: 'My Dashboard',
+    pathname: 'my-dashboard',
   },
-  "conditions": [
+  conditions: [
     {
-      "alias": "Umb.Condition.SectionAlias",
-      "match": "Umb.Section.Content"
-    }
-  ]
-}
+      alias: 'Umb.Condition.SectionAlias',
+      match: 'Umb.Section.Content',
+    },
+  ],
+};
 ```
 
-### Implementation (dashboard.js)
-```javascript
-import { LitElement, html, css } from '@umbraco-cms/backoffice/external/lit';
-import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
+### Implementation (my-dashboard.element.ts)
+```typescript
+import { html, css } from '@umbraco-cms/backoffice/external/lit';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
+import { customElement } from '@umbraco-cms/backoffice/external/lit';
 
-export default class MyDashboardElement extends UmbElementMixin(LitElement) {
-  render() {
+@customElement('my-dashboard')
+export class MyDashboardElement extends UmbLitElement {
+  override render() {
     return html`
       <uui-box headline="My Dashboard">
         <p>Dashboard content goes here</p>
@@ -89,7 +98,7 @@ export default class MyDashboardElement extends UmbElementMixin(LitElement) {
     `;
   }
 
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       padding: var(--uui-size-space-4);
@@ -97,7 +106,13 @@ export default class MyDashboardElement extends UmbElementMixin(LitElement) {
   `;
 }
 
-customElements.define('my-dashboard', MyDashboardElement);
+export default MyDashboardElement;
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'my-dashboard': MyDashboardElement;
+  }
+}
 ```
 
 That's it! Always fetch fresh docs, keep examples minimal, generate complete working code.
